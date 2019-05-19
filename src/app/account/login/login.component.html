@@ -1,0 +1,27 @@
+<div class="panel">
+  <div class="ui-g-12 panel-title">
+    Войти
+  </div>
+  <div class="ui-g-12 panel-body">
+    <form (ngSubmit)="login()">
+      <div class="ui-g-12">
+        <input id="usernameInput" class="field"
+               type="text" pInputText placeholder="Имя"
+               [(ngModel)]="credentials.username" [ngModelOptions]="{standalone: true}"/>
+        <br>
+      </div>
+      <div class="ui-g-12">
+        <input type="password" pPassword class="field"
+               placeholder="Пароль" [feedback]="false"
+               [(ngModel)]="credentials.password" [ngModelOptions]="{standalone: true}"/>
+      </div>
+      <div class="ui-g-6">
+        <button pButton type="button" label="Войти"
+                (click)="login()" [disabled]="!credentials.validate()"></button>
+      </div>
+      <div class="ui-g-6" style="height: 45px">
+        <a routerLink="register">Зарегистрироваться</a>
+      </div>
+    </form>
+  </div>
+</div>

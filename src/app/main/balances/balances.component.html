@@ -1,0 +1,37 @@
+<div class="ui-g-5"></div>
+<div class="ui-g-2">
+  <h1>Счета</h1>
+</div>
+<div class="ui-g-5"></div>
+
+<div class="ui-g-12">
+  <p-button label="Добавить счет" (onClick)="createBalance()"></p-button>
+</div>
+
+<div class="ui-g-12">
+  <p-table *ngIf="balances.length !== 0" [value]="balances">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Имя счета</th>
+        <th>Валюта</th>
+        <th>Актуальный баланс</th>
+        <th>Управление</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-balance>
+      <tr style="height: 50px">
+        <td>{{balance.name}}</td>
+        <td>{{balance.currency}}</td>
+        <td>{{balance.balance}}</td>
+        <td>
+          <div style="display: flex; justify-content: center">
+            <p-button class="control_button" label="Править" (onClick)="edit(balance.id)"></p-button>
+            <p-button class="control_button" label="Удалить" (onClick)="delete(balance.id)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmDialog header="Подтверждение" icon="pi pi-exclamation-triangle"></p-confirmDialog>

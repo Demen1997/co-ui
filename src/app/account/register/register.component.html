@@ -1,0 +1,45 @@
+<div class="panel">
+  <div class="ui-g-12 panel-title">
+    REGISTER
+  </div>
+  <div class="ui-g-12 panel-body">
+    <form (ngSubmit)="register()">
+      <div class="ui-g-12">
+        <input class="field" type="text"
+               pInputText placeholder="Имя"
+               [(ngModel)]="regData.username"
+               [ngModelOptions]="{standalone: true}"
+        />
+        <br>
+      </div>
+      <div class="ui-g-12">
+        <input pInputText class="field"
+               pKeyFilter="email" placeholder="Почта"
+               [(ngModel)]="regData.email"
+               [ngModelOptions]="{standalone: true}"
+        />
+      </div>
+      <div class="ui-g-12">
+        <input type="password" pPassword class="field"
+               placeholder="Пароль"
+               promptLabel="Введите пароль"
+               weakLabel="Слабый пароль"
+               strongLabel="Хороший пароль"
+               mediumLabel="Отличный пароль"
+               [(ngModel)]="regData.password"
+               [ngModelOptions]="{standalone: true}"
+        />
+      </div>
+      <div class="ui-g-12">
+        <input type="password" pPassword class="field"
+               placeholder="Повторите пароль" [feedback]="false"/>
+      </div>
+      <div class="ui-g-6">
+        <button pButton type="button" label="Зарегистрироваться" (click)="register()"></button>
+      </div>
+      <div class="ui-g-6" style="height: 45px">
+        <a routerLink="..">Обратно</a>
+      </div>
+    </form>
+  </div>
+</div>

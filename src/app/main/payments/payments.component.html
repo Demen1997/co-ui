@@ -1,0 +1,39 @@
+<div class="ui-g-5"></div>
+<div class="ui-g-2">
+  <h1>Транзакции</h1>
+</div>
+<div class="ui-g-5"></div>
+
+<div class="ui-g-12">
+  <p-button label="Добавить платеж" (onClick)="createPayment()" [disabled]="userBalances.length === 0"></p-button>
+</div>
+<div class="ui-g-12">
+  <p-multiSelect [options]="userBalances" [(ngModel)]="balancesCriteria" (onChange)="updateTransactionTable()"></p-multiSelect>
+</div>
+<div class="ui-g-12" *ngIf="transactions.length !== 0">
+  <p-table [value]="transactions">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Дата/время</th>
+        <th>Счет</th>
+        <th>Описание</th>
+        <th>Приход</th>
+        <th>Расход</th>
+        <th>Актуальный баланс</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-transaction>
+      <tr>
+        <td>{{transaction.datetime}}</td>
+        <td>{{transaction.balanceName}}</td>
+        <td>{{transaction.description}}</td>
+        <td style="color: green">{{transaction.income !== 0 ? transaction.income : ''}}</td>
+        <td style="color: red">{{transaction.expenses !== 0 ? transaction.expenses : ''}}</td>
+        <td>{{transaction.actualBalance}}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-confirmDialog header="Подтверждение" icon="pi pi-exclamation-triangle"></p-confirmDialog>
