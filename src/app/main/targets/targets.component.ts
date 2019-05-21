@@ -1,119 +1,122 @@
 import {Component, OnInit} from '@angular/core';
-import {Budget, emptyBudget} from '../../core/model/main/budget.model';
-import {Service} from '../../core/service/service';
 import {Action, Result} from '../../core/model/main/action.model';
+import {BudgetDialog, BudgetExpendDialog} from '../budgets/budgets.component';
 import {ConfirmationService, DialogService, DynamicDialogConfig, DynamicDialogRef, SelectItem} from 'primeng/api';
+import {Service} from '../../core/service/service';
 import {NotificationService} from '../../core/service/notification.service';
+import {emptyGoal, Goal} from '../../core/model/main/goal.model';
+import {Budget} from '../../core/model/main/budget.model';
 import {BalancesService} from '../../core/service/balances.service';
 import {TransactionService} from '../../core/service/transaction.service';
 import {Balance} from '../../core/model/main/balance.model';
 import {finalize} from 'rxjs/operators';
 
 @Component({
-  selector: 'app-budgets',
-  templateUrl: './budgets.component.html',
-  styleUrls: ['./budgets.component.css'],
+  selector: 'app-targets',
+  templateUrl: './targets.component.html',
+  styleUrls: ['./targets.component.css'],
   providers: [
     DialogService,
     ConfirmationService,
     Service,
     {
       provide: Service.CONFIG_URL,
-      useValue: `${Service.API_URL}/budgets`
+      useValue: `${Service.API_URL}/goals`
     }
   ]
 })
-export class BudgetsComponent implements OnInit {
+export class TargetsComponent implements OnInit {
+
+  public static readonly ROUTER_PATH = 'targets';
+
+  goals: Goal[] = [];
+
+  private readonly updateGoalsFunc = result => {
+    if (result === Result.SUCCESS) {
+      this.updateGoals();
+    }
+  };
 
   constructor(private dialogService: DialogService,
+              private goalService: Service<Goal>,
               private balanceService: BalancesService,
-              private budgetService: Service<Budget>,
               private messageService: NotificationService,
               private confirmationService: ConfirmationService) {
   }
 
-  public static readonly ROUTER_PATH = 'budgets';
-  budgets: Budget[] = [];
-
-  private readonly updateBudgetsFunc = result => {
-    if (result === Result.SUCCESS) {
-      this.updateBudgets();
-    }
-  };
-
   ngOnInit() {
-    this.updateBudgets();
+    this.updateGoals();
   }
 
-  createBudget() {
-    this.dialogService.open(BudgetDialog, {
-      header: 'Создать бюджет',
+  createGoal() {
+    this.dialogService.open(GoalDialog, {
+      header: 'Создать цель',
       data: {
         action: Action.CREATE
       }
-    }).onClose.subscribe(this.updateBudgetsFunc);
+    }).onClose.subscribe(this.updateGoalsFunc);
   }
 
   edit(id: number) {
-    this.dialogService.open(BudgetDialog, {
-      header: `Править бюджет: ${id}`,
+    this.dialogService.open(GoalDialog, {
+      header: `Править цель: ${id}`,
       data: {
-        balanceId: id,
+        goalId: id,
         action: Action.EDIT
       }
-    }).onClose.subscribe(this.updateBudgetsFunc);
+    }).onClose.subscribe(this.updateGoalsFunc);
   }
 
   delete(id: number) {
     this.confirmationService.confirm({
-      message: 'Удалить этот бюджет?',
+      message: 'Удалить эту цель?',
       accept: () => {
-        this.budgetService.delete(id)
+        this.goalService.delete(id)
           .subscribe(_ => {
-            this.messageService.logSuccess('Бюджет был удален');
-            this.updateBudgets();
+            this.messageService.logSuccess('Цель была удалена');
+            this.updateGoals();
           }, () => this.messageService.logError('Неизвестная ошибка'));
       }
     });
-  }
-
-  expend(id: number) {
-    this.budgetService.get(id).subscribe(
-      response => {
-        this.balanceService.getAllByCurrency(response.currency)
-          .subscribe(
-            balancesResponse => {
-              const balances = (balancesResponse.body as Balance[]);
-              if (balances.length === 0) {
-                this.messageService.logError('Сначала создайте баланс с валютой, соответствующей данному бюджету');
-                return;
-              }
-
-              this.dialogService.open(BudgetExpendDialog, {
-                header: `Потратить бюджет: ${id}`,
-                data: {
-                  budget: response,
-                  balances
-                }
-              }).onClose.subscribe(this.updateBudgetsFunc);
-            },
-            () => this.messageService.logError('Неизвестная ошибка')
-          );
-      },
-      () => this.messageService.logError('Не удалось получить данные бюджета')
-    );
   }
 
   roundRelAmount(relAmount: number) {
     return relAmount.toFixed(2);
   }
 
-  private updateBudgets() {
-    this.budgetService.getAll()
+  private updateGoals() {
+    this.goalService.getAll()
       .subscribe(
-        response => this.budgets = response.body ? response.body : [],
+        response => this.goals = response.body ? response.body : [],
         _ => this.messageService.logError('Неизвестная ошибка')
       );
+  }
+
+  addMoney(id: any) {
+    this.goalService.get(id).subscribe(
+      response => {
+        this.balanceService.getAllByCurrency(response.currency)
+          .subscribe(
+            balancesResponse => {
+              const balances = (balancesResponse.body as Balance[]);
+              if (balances.length === 0) {
+                this.messageService.logError('Сначала создайте баланс с валютой, соответствующей данной цели');
+                return;
+              }
+
+              this.dialogService.open(GoalFillingDialog, {
+                header: `Пополнить цель: ${id}`,
+                data: {
+                  goal: response,
+                  balances
+                }
+              }).onClose.subscribe(this.updateGoalsFunc);
+            },
+            () => this.messageService.logError('Неизвестная ошибка')
+          );
+      },
+      () => this.messageService.logError('Не удалось получить данные цели')
+    );
   }
 }
 
@@ -121,10 +124,10 @@ export class BudgetsComponent implements OnInit {
   template: `
     <form (ngSubmit)="confirm()">
       <div class="ui-g-12">
-        <label for="budgetName">Имя бюджета</label>
+        <label for="budgetName">Имя цели</label>
         <input id="budgetName" class="field"
-               type="text" pInputText placeholder="Имя бюджета"
-               [(ngModel)]="budget.name" [ngModelOptions]="{standalone: true}"/>
+               type="text" pInputText placeholder="Имя цели"
+               [(ngModel)]="goal.name" [ngModelOptions]="{standalone: true}"/>
         <br>
       </div>
       <div class="ui-g-12">
@@ -135,15 +138,15 @@ export class BudgetsComponent implements OnInit {
                     [disabled]="isActionEdit()"></p-dropdown>
       </div>
       <div class="ui-g-12">
-        <label for="initialAmount">Начальный капитал</label>
-        <input type="text" pInputText class="field" placeholder="Начальный капитал"
+        <label for="initialAmount">Сумма цели</label>
+        <input type="text" pInputText class="field" placeholder="Сумма цели"
                [disabled]="isActionEdit()" id="initialAmount" pKeyFilter="pint"
-               [(ngModel)]="budget.initialAmount" [ngModelOptions]="{standalone: true}"/>
+               [(ngModel)]="goal.initialAmount" [ngModelOptions]="{standalone: true}"/>
       </div>
       <div class="ui-g-12" *ngIf="isActionEdit()">
-        <label for="balance">Текущий капитал</label>
+        <label for="balance">Текущий прогресс</label>
         <input type="text" pInputText class="field" disabled id="balance"
-               [(ngModel)]="budget.currentAmount" [ngModelOptions]="{standalone: true}"/>
+               [(ngModel)]="goal.currentAmount" [ngModelOptions]="{standalone: true}"/>
       </div>
       <div class="ui-g-6">
         <button pButton type="button" label="Применить"
@@ -155,18 +158,18 @@ export class BudgetsComponent implements OnInit {
     Service,
     {
       provide: Service.CONFIG_URL,
-      useValue: `${Service.API_URL}/budgets`
+      useValue: `${Service.API_URL}/goals`
     }
   ]
 })
 // tslint:disable-next-line
-export class BudgetDialog implements OnInit {
-  budget: Budget = new Budget();
+export class GoalDialog implements OnInit {
+  goal: Goal = new Goal();
   action: Action;
   availableCurrencies: SelectItem[] = [];
   pickedCurrency: string;
 
-  constructor(private budgetService: Service<Budget>,
+  constructor(private goalService: Service<Goal>,
               private messageService: NotificationService,
               public ref: DynamicDialogRef,
               public config: DynamicDialogConfig) {
@@ -174,16 +177,7 @@ export class BudgetDialog implements OnInit {
   }
 
   ngOnInit() {
-    if (this.isActionEdit()) {
-      this.budgetService.get(this.config.data.balanceId)
-        .subscribe(data => {
-          this.budget = data;
-          this.pickedCurrency = data.currency;
-        });
-      return;
-    }
-
-    this.budgetService.getAvailableCurrencies()
+    this.goalService.getAvailableCurrencies()
       .subscribe(
         data => {
           this.availableCurrencies = data.map(c => ({label: c, value: c}));
@@ -192,19 +186,37 @@ export class BudgetDialog implements OnInit {
         () => this.messageService.logError('Неизвестная ошибка')
       );
 
-    this.budget = emptyBudget();
+    if (this.isActionEdit()) {
+      this.goalService.get(this.config.data.goalId)
+        .subscribe(data => {
+          this.goal = data;
+          this.pickedCurrency = data.currency;
+        });
+      return;
+    }
+
+    this.goalService.getAvailableCurrencies()
+      .subscribe(
+        data => {
+          this.availableCurrencies = data.map(c => ({label: c, value: c}));
+          this.pickedCurrency = this.availableCurrencies[0].value;
+        },
+        () => this.messageService.logError('Неизвестная ошибка')
+      );
+
+    this.goal = emptyGoal();
   }
 
   confirm() {
     if (this.action === Action.EDIT) {
-      if (!this.budget.name.trim()) {
-        this.messageService.logError('Введите корректные данные бюджета');
+      if (!this.goal.name.trim()) {
+        this.messageService.logError('Введите корректные данные цели');
         this.ref.close();
       }
-      this.budgetService.update(this.budget)
+      this.goalService.update(this.goal)
         .subscribe(
           _ => {
-            this.messageService.logSuccess('Бюджет был обновлен');
+            this.messageService.logSuccess('Цель была обновлена');
             this.ref.close(Result.SUCCESS);
           },
           _ => {
@@ -215,16 +227,16 @@ export class BudgetDialog implements OnInit {
       return;
     }
 
-    this.budget.currency = this.pickedCurrency;
-    if (!this.budget.validate(this.action)) {
+    this.goal.currency = this.pickedCurrency;
+    if (!this.goal.validate(this.action)) {
       this.ref.close();
-      return this.messageService.logError('Введите корректные данные бюджета');
+      return this.messageService.logError('Введите корректные данные цели');
     }
 
-    this.budgetService.create(this.budget)
+    this.goalService.create(this.goal)
       .subscribe(
         _ => {
-          this.messageService.logSuccess('Бюджет был создан');
+          this.messageService.logSuccess('Цель была создана');
           this.ref.close(Result.SUCCESS);
         },
         error => {
@@ -276,10 +288,10 @@ export class BudgetDialog implements OnInit {
   ]
 })
 // tslint:disable-next-line
-export class BudgetExpendDialog {
+export class GoalFillingDialog {
 
   currency: string;
-  budget: Budget;
+  goal: Goal;
   availableBalances: SelectItem[];
   selectedBalance: number;
   displayedBalance: number;
@@ -292,16 +304,16 @@ export class BudgetExpendDialog {
               private messageService: NotificationService,
               public ref: DynamicDialogRef,
               public config: DynamicDialogConfig) {
-    this.budget = this.config.data.budget;
+    this.goal = this.config.data.goal;
     this.getAvailableBalances(this.config.data.balances);
   }
 
   confirm() {
-    this.transactionService.expendBudget({
+    this.transactionService.fillGoal({
       balanceId: this.selectedBalance,
-      amount: -this.amount,
-      description: `${new Date().toISOString()}. System payment from ${this.budget.name}`
-    }, this.budget.id)
+      amount: this.amount,
+      description: `${new Date().toISOString()}. System payment from ${this.goal.name}`
+    }, this.goal.id)
       .pipe(finalize(() => this.ref.close(Result.SUCCESS)))
       .subscribe(
         () => this.messageService.logSuccess('Транзакция создана'),
@@ -316,4 +328,3 @@ export class BudgetExpendDialog {
     this.displayedCurrency = balances[0].currency;
   }
 }
-

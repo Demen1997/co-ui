@@ -30,6 +30,12 @@ export class TransactionService {
     });
   }
 
+  fillGoal(req: TransactionRequest, goalId: number) {
+    return this.httpClient.post(BASE_URL + '/fulfillGoal', {...req, goalId}, {
+      observe: 'response'
+    });
+  }
+
   getTransactions(balances: number[]): Observable<Transaction[]> {
     return this.httpClient.get<Transaction[]>(`${BASE_URL}?balances=${balances.join(',')}`);
   }

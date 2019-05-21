@@ -10,6 +10,7 @@ import {FormsModule} from '@angular/forms';
 import {ConfirmDialogModule, DropdownModule, KeyFilterModule} from 'primeng/primeng';
 import {PaymentDialog, PaymentsComponent} from './payments/payments.component';
 import {BudgetDialog, BudgetExpendDialog, BudgetsComponent} from './budgets/budgets.component';
+import {GoalDialog, GoalFillingDialog, TargetsComponent} from './targets/targets.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,10 @@ import {BudgetDialog, BudgetExpendDialog, BudgetsComponent} from './budgets/budg
     BudgetDialog,
     BudgetExpendDialog,
     PaymentsComponent,
-    BudgetsComponent
+    BudgetsComponent,
+    TargetsComponent,
+    GoalDialog,
+    GoalFillingDialog
   ],
   imports: [
     MainRoutingModule,
@@ -37,7 +41,9 @@ import {BudgetDialog, BudgetExpendDialog, BudgetsComponent} from './budgets/budg
     BalanceDialog,
     PaymentDialog,
     BudgetDialog,
-    BudgetExpendDialog
+    BudgetExpendDialog,
+    GoalDialog,
+    GoalFillingDialog
   ]
 })
 export class MainModule {

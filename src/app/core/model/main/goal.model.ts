@@ -4,7 +4,9 @@ export class Goal {
   id: number;
   name: string;
   currency: string;
-  balance: number;
+  currentAmount: number;
+  initialAmount: number;
+  isDeletable: boolean;
 
   validate(action: Action): boolean {
     if (action === Action.EDIT) {
@@ -15,4 +17,4 @@ export class Goal {
   }
 }
 
-export const emptyBalance: () => Goal = () => new Goal();
+export const emptyGoal: () => Goal = () => new Goal();
