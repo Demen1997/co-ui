@@ -36,4 +36,9 @@
   </p-table>
 </div>
 
-<p-confirmDialog header="Подтверждение" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-confirmDialog #cd header="Подтверждение" icon="pi pi-exclamation-triangle">
+  <p-footer>
+    <button type="button" pButton label="Нет" (click)="cd.reject()"></button>
+    <button type="button" pButton label="Да" (click)="cd.accept()"></button>
+  </p-footer>
+</p-confirmDialog>

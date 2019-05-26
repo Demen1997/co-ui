@@ -6,6 +6,7 @@ import {DashboardComponent} from './dashboard/dashboard.component';
 import {PaymentsComponent} from './payments/payments.component';
 import {BudgetsComponent} from './budgets/budgets.component';
 import {TargetsComponent} from './targets/targets.component';
+import {InfoComponent} from './info/info.component';
 
 const routes: Route[] = [
   {
@@ -31,6 +32,10 @@ const routes: Route[] = [
       {
         path: TargetsComponent.ROUTER_PATH,
         component: TargetsComponent
+      },
+      {
+        path: InfoComponent.ROUTER_PATH,
+        component: InfoComponent
       }
     ]
   }

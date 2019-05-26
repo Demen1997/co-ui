@@ -11,6 +11,7 @@ import {ConfirmDialogModule, DropdownModule, KeyFilterModule} from 'primeng/prim
 import {PaymentDialog, PaymentsComponent} from './payments/payments.component';
 import {BudgetDialog, BudgetExpendDialog, BudgetsComponent} from './budgets/budgets.component';
 import {GoalDialog, GoalFillingDialog, TargetsComponent} from './targets/targets.component';
+import { InfoComponent } from './info/info.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import {GoalDialog, GoalFillingDialog, TargetsComponent} from './targets/targets
     BudgetsComponent,
     TargetsComponent,
     GoalDialog,
-    GoalFillingDialog
+    GoalFillingDialog,
+    InfoComponent
   ],
   imports: [
     MainRoutingModule,

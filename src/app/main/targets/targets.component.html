@@ -26,7 +26,7 @@
         <td>{{goal.initialAmount}}</td>
         <td>{{goal.currentAmount}}</td>
         <td>
-          <p-progressBar [value]="roundRelAmount(goal.currentAmount / goal.initialAmount)"></p-progressBar>
+          <p-progressBar [value]="roundRelAmount(goal.currentAmount / goal.initialAmount * 100)"></p-progressBar>
         </td>
         <td>{{goal.currency}}</td>
         <td>
@@ -41,4 +41,9 @@
   </p-table>
 </div>
 
-<p-confirmDialog header="Подтверждение" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-confirmDialog #cd header="Подтверждение" icon="pi pi-exclamation-triangle">
+  <p-footer>
+    <button type="button" pButton label="Нет" (click)="cd.reject()"></button>
+    <button type="button" pButton label="Да" (click)="cd.accept()"></button>
+  </p-footer>
+</p-confirmDialog>
